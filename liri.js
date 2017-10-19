@@ -12,10 +12,10 @@ var pickArg = function(action, responseData) {
             myTweets();
             break;
         case 'spotify-this-song':
-            spotifyThatSong();
+            spotifyThatSong(responseData);
             break;
         case 'movie-this':
-            movieThis();
+            movieThis(responseData);
             break;
         case 'do-what-it-says':
             doItWell();
@@ -55,11 +55,15 @@ function myTweets() {
 //this will show the artist, song's name, preview link of the song and the album
 //if no song is provided, it will default to "The Sign" by Ace of Base
 
-function getArtist(artist) {
+var getArtist = function(artist) {
     return artist.name;
 }
 
 function spotifyThatSong(name) {
+
+    if (name === undefined) {
+        name = "The Sign";
+    }
 
     var spotify = new Spotify({
         id: "f2b90fa89d71401dbcee976d3aa148c4",
@@ -70,8 +74,7 @@ function spotifyThatSong(name) {
         if (err) {
             return console.log('Error occurred: ' + err);
         }
-        var track = data.tracks.items;
-        console.log(track);
+        var track = data.tracks.items[0];
         console.log("=========================================");
         console.log('artist: ' + track.artists.map(getArtist));
         console.log('song name: ' + track.name);
@@ -80,9 +83,6 @@ function spotifyThatSong(name) {
         console.log("=========================================");
     });
 }
-
-spotifyThatSong("The Sign");
-
 
 //code for movie this
 //will output the title of the movie, release year, imdb rating, rotten tomatoes rating
