@@ -2,7 +2,7 @@
 var keys = require("./keys.js");
 var Twitter = require('twitter');
 var Spotify = require("node-spotify-api");
-//var request = require("request");
+var request = require("request");
 var fs = require("fs");
 
 
@@ -21,7 +21,7 @@ var pickArg = function(action, responseData) {
             doItWell();
             break;
         default:
-            console.log("I do not understan");
+            console.log("I do not understand");
     }
 }
 
@@ -54,6 +54,11 @@ function myTweets() {
 //code for spotify-this-song
 //this will show the artist, song's name, preview link of the song and the album
 //if no song is provided, it will default to "The Sign" by Ace of Base
+
+function getArtist(artist) {
+    return artist.name;
+}
+
 function spotifyThatSong(name) {
 
     var spotify = new Spotify({
@@ -65,10 +70,10 @@ function spotifyThatSong(name) {
         if (err) {
             return console.log('Error occurred: ' + err);
         }
-        var track = data.tracks.items[0];
+        var track = data.tracks.items;
         console.log(track);
         console.log("=========================================");
-        console.log('artist: ' + track.artist);
+        console.log('artist: ' + track.artists.map(getArtist));
         console.log('song name: ' + track.name);
         console.log('preview song: ' + track.preview_url);
         console.log('album: ' + track.album.name);
@@ -85,7 +90,55 @@ spotifyThatSong("The Sign");
 //if no movie is provided, it will default to Mr.Nobody
 //use api key '40e9cece'
 
+function movieThis(movieName) {
+    if (movieName === undefined) {
+        movieName = 'Mr Nobody';
+    }
+    var queryURL = "http://www.omdbapi.com/?apikey=40e9cece&t=" + movieName + "&y=&plot=short&tomatoes=true&r=json";
+
+    request(queryURL, function(error, response, body) {
+        if (!error && response.statusCode == 200) {
+            var dataArr = [];
+            var movieData = JSON.parse(body);
+
+            dataArr.push({
+                'Title: ': movieData.Title,
+                'Year: ': movieData.Year,
+                'Rated: ': movieData.Rated,
+                'IMDB Rating: ': movieData.imbdRating,
+                'Country: ': movieData.Country,
+                'Language: ': movieData.Language,
+                'Actors: ': movieData.Actors,
+                'Rotten Tomatoes Rating: ': movieData.tomatoRating,
+            });
+            console.log(dataArr);
+        }
+    });
+
+}
+
 //code for do-what-it-says
 //using fs, take the text inside the random text and use it to call one of Liri's commands
+
+function doItWell() {
+    fs.readFile("random.txt", "utf8", function(error, data) {
+        console.log(data);
+        var datArr = data.split(',');
+
+        if (datArr.length == 2) {
+            pickArg(datArr[0], datArr[1]);
+        } else if (datArr.length == 1) {
+            pickArg(datArr[0]);
+        }
+    });
+}
+
+function runIt(argOne, argTwo) {
+    pickArg(argOne, argTwo);
+}
+
+runIt(process.argv[2], process.argv[3]);
+
+
 
 //Bonus: output the data into a log.txt that you test from the commands
